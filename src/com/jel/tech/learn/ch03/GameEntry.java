@@ -1,4 +1,4 @@
-package com.jel.tech.learn.ch01;
+package com.jel.tech.learn.ch03;
 
 /**
  * 记录前几名的姓名和分数

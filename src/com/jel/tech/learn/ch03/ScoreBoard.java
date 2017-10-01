@@ -1,4 +1,4 @@
-package com.jel.tech.learn.ch01;
+package com.jel.tech.learn.ch03;
 /**
  * 存储高分者的数据模型
  * @author jelex.xu
