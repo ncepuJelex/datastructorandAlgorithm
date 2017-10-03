@@ -8,7 +8,7 @@ package com.jel.tech.learn.ch03;
  * @date 2017年10月1日
  * @param <E>
  */
-public class SinglyLinkedList<E> {
+public class SinglyLinkedList<E> implements Cloneable {
 
 	private static class Node<E> {
 		private E element;
@@ -34,6 +34,10 @@ public class SinglyLinkedList<E> {
 	private int size = 0; //链表元素个数
 
 	public SinglyLinkedList() {
+	}
+
+	public int size() {
+		return size;
 	}
 
 	/*
@@ -106,5 +110,58 @@ public class SinglyLinkedList<E> {
 		}
 		return e;
 	}
+	/*
+	 * 重写equals方法
+	 */
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) return false;
+		if(this.getClass() != obj.getClass()) return false;
+		/*
+		 * Although our SinglyLinkedList class has a declared
+		 * formal type parameter <E>, we cannot detect at
+		 * runtime whether the other list has a matching type
+		 * 所以不使用SinglyLinkedList<E>,下面walkA和walkB也是因此
+		 */
+		SinglyLinkedList other = (SinglyLinkedList) obj;
+		if(this.size != other.size) {
+			return false;
+		}
+		Node walkA = this.head; //当前链表遍历位置
+		Node walkB = other.head; //待比较链表遍历位置
+		while(walkA != null) {
+			/*
+			 * 这是建立在SinglyLinkedList内的元素内容不为空的前提下
+			 */
+			if(!walkA.getElement().equals(walkB.getElement())) {
+				return false;
+			}
+			walkA = walkA.getNext();
+			walkB = walkB.getNext();
+		}
+		return true;
+	}
+
+	public SinglyLinkedList<E> clone() throws CloneNotSupportedException {
+		//把size和head clone一下,size这样搞没问题，但是head就不行了，除非head==null
+		//一般都会调用一下super.clone(),把那些非引用字段可以克隆出来
+		SinglyLinkedList other = (SinglyLinkedList) super.clone();
+		if(size > 0) {
+			//重新处理克隆节点的head元素
+			other.head = new Node<E>(head.getElement(), null);
+			//克隆节点的最后一个元素，它是实时更新的,初始化为它的头节点
+			Node<E> otherTail = other.head;
+			Node<E> walk = head.getNext(); //遍历起始位置
+			while(walk != null) {
+				Node<E> newest = new Node<E>(walk.getElement(), null);
+				otherTail.setNext(newest);
+				otherTail = newest; //更新克隆节点的tail
+				walk = walk.getNext();
+			}
+		}
+		return other;
+	}
+
 
 }
