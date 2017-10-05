@@ -163,5 +163,21 @@ public class SinglyLinkedList<E> implements Cloneable {
 		return other;
 	}
 
+	/**
+	 * Produces a string representation of the contents of the list. This exists
+	 * for debugging purposes only.
+	 */
+	public String toString() {
+		StringBuilder sb = new StringBuilder('(');
+		Node<E> walk = head;
+		while (walk != null) {
+			sb.append(walk.getElement());
+			if (walk != tail) {
+				sb.append(',').append(' ');
+			}
+			walk = walk.getNext();
+		}
+		return sb.append(')').toString();
+	}
 
 }

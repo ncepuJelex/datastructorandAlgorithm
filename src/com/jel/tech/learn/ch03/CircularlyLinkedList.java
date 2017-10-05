@@ -1,5 +1,6 @@
 package com.jel.tech.learn.ch03;
 
+
 /**
  * 首尾相接的链表，Round-Robin Scheduling CPU执行时间片时，循环执行每个任务固定时间片
  *
@@ -100,5 +101,24 @@ public class CircularlyLinkedList<E> {
 		}
 		size--;
 		return head.getElement();
+	}
+
+	/**
+	 * Produces a string representation of the contents of the list. This exists
+	 * for debugging purposes only.
+	 */
+	public String toString() {
+		if (tail == null)
+			return "()";
+		StringBuilder sb = new StringBuilder("(");
+		Node<E> walk = tail;
+		do {
+			walk = walk.getNext();
+			sb.append(walk.getElement());
+			if (walk != tail)
+				sb.append(", ");
+		} while (walk != tail);
+		sb.append(")");
+		return sb.toString();
 	}
 }
