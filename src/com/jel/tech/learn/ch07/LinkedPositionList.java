@@ -277,4 +277,20 @@ public class LinkedPositionList<E> implements PositionList<E> {
 
 	}
 
+	@Override
+	public String toString() {
+
+		//竟然不能new StringBuilder('('); 这样输出不出来！我靠！
+		StringBuilder sb = new StringBuilder("(");
+		Node<E> n = header.getNext();
+		while(n != trailer) {
+			sb.append(n.getElement());
+			n = n.getNext();
+			if(n != trailer) {
+				sb.append(',').append(' ');
+			}
+		}
+		return sb.append(')').toString();
+	}
+
 }
