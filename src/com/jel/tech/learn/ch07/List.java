@@ -6,7 +6,7 @@ package com.jel.tech.learn.ch07;
  * @date 2017年10月5日
  * @param <E>
  */
-public interface List<E> {
+public interface List<E> extends Iterable<E> {
 
 	int size();
 	boolean isEmpty();

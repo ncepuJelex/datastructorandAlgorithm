@@ -1,5 +1,8 @@
 package com.jel.tech.learn.ch07;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * 基于数组实现的list
  * @author jelex.xu
@@ -101,5 +104,55 @@ public class ArrayList<E> implements List<E> {
 		}
 		//让data重新指向新的数组，原来的没引用指向它就会被GC
 		data = temp;
+	}
+
+	/*
+	 * 注意哦，前面不能有<E>标识！
+	 */
+	private class ArrayIterator implements Iterator<E> {
+
+		private int j; //遍历的位置
+		private boolean removable = false; //表示当前是否可调用remove方法
+		/*
+		 * 只要还没有遍历到list最后，hasNext()就返回true
+		 */
+		@Override
+		public boolean hasNext() {
+			return j<size;
+		}
+
+		@Override
+		public E next() throws NoSuchElementException {
+			if(j==size) {
+				throw new NoSuchElementException("没有元素了！");
+			}
+			removable = true; //此时可remove了！
+			return data[j++];
+		}
+
+		/*
+		 * 可选择性的重写的方法
+		 */
+		@Override
+		public void remove() {
+			if(!removable) {
+				throw new IllegalStateException("nothine to remove.");
+			}
+			//调用remove()之前，next()已经j++了，所以是j-1.
+			ArrayList.this.remove(j-1); //that was the last one returned
+			j--; //next element has shifted one cell to the left
+			removable = false; //do not allow remove again until next is called
+		}
+
+	}
+
+	/*
+	 * 这是实时的，和list中元素是实时同步的，而不是
+	 * 初始化时的snapshot,把那个时刻的list元素复制出来，
+	 * 我们这个是lazy initial.
+	 */
+	@Override
+	public Iterator<E> iterator() {
+		return new ArrayIterator();
 	}
 }
