@@ -1,32 +1,23 @@
 package com.jel.tech.learn.ch08;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
+import com.jel.tech.learn.ch06.LinkedQueue;
+import com.jel.tech.learn.ch06.Queue;
 import com.jel.tech.learn.ch07.Position;
 
 public abstract class AbstractTree<E> implements Tree<E> {
 
-	@Override
-	public Position<E> root() {
-		return null;
-	}
-
-	@Override
-	public Position<E> parent(Position<E> p) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Iterable<Position<E>> children(Position<E> p) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
+	public AbstractTree() {
 	}
 
 	@Override
 	public int numChildren(Position<E> p) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return 0;
+		int count=0;
+	    for (Position<E> child : children(p)) count++;
+	    return count;
 	}
 
 	@Override
@@ -46,8 +37,11 @@ public abstract class AbstractTree<E> implements Tree<E> {
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		int count = 0;
+		for(Position<E> p : positions()) {
+			count++;
+		}
+		return count;
 	}
 
 	@Override
@@ -57,14 +51,90 @@ public abstract class AbstractTree<E> implements Tree<E> {
 
 	@Override
 	public Iterator<E> iterator() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ElementIterator();
 	}
 
+	/*
+	 * 默认采用的是先序遍历
+	 */
 	@Override
 	public Iterable<Position<E>> positions() {
-		// TODO Auto-generated method stub
-		return null;
+		return preorder();
+	}
+
+	/*
+	 * 先序遍历
+	 */
+	public Iterable<Position<E>> preorder() {
+		List<Position<E>> snapshot = new ArrayList<>();
+		if(!isEmpty()) {
+			preorderSubtree(root(), snapshot);
+		}
+		return snapshot;
+	}
+	/*
+	 * 先序遍历工具内部调用方法
+	 */
+	private void preorderSubtree(Position<E> p, List<Position<E>> snapshot) {
+		snapshot.add(p);
+		/*
+		 * 递归遍历孩子节点
+		 */
+		for(Position<E> c : children(p)) {
+			preorderSubtree(c, snapshot);
+		}
+	}
+	/*
+	 * 后序遍历
+	 */
+	public Iterable<Position<E>> postorder() {
+		List<Position<E>> snapshot = new ArrayList<>();
+		if(!isEmpty()) {
+			postorderSubtree(root(), snapshot);
+		}
+		return snapshot;
+	}
+	/*
+	 * 后序遍历内部调用方法
+	 */
+	private void postorderSubtree(Position<E> p, List<Position<E>> snapshot) {
+		for(Position<E> child : children(p)) {
+			postorderSubtree(child, snapshot);
+		}
+		snapshot.add(p);
+	}
+	/*
+	 * bread-first:水平一层层遍历
+	 */
+	public Iterable<Position<E>> breadFirst() {
+		List<Position<E>> snapshot = new ArrayList<>();
+		//不为空才去遍历，记得哦！
+		if(!isEmpty()) {
+			/*
+			 * 这里使用queue这种数据结构，把当前遍历节点
+			 * 的孩子（仅仅是儿子和女儿）放到queue中，然后从queue
+			 * 中取出来遍历处理
+			 */
+			Queue<Position<E>> fringe = new LinkedQueue<>();
+			//把根节点放到queue中，作为起始
+			fringe.enqueue(root());
+			/*
+			 * 从queue取出元素处理，把他们的孩子压入queue，
+			 * 直到queue为空
+			 */
+			while(!fringe.isEmpty()) {
+				Position<E> p = fringe.dequeue();
+				//处理当前节点
+				snapshot.add(p);
+				/*
+				 * 把当前节点的孩子节点压入queue
+				 */
+				for(Position<E> child : children(p)) {
+					fringe.enqueue(child);
+				}
+			}
+		}
+		return snapshot;
 	}
 
 	/*
@@ -112,6 +182,30 @@ public abstract class AbstractTree<E> implements Tree<E> {
 			h = Math.max(h, 1+height(c));
 		}
 		return h;
+	}
+
+	/**
+	 * 内部类，它依赖positions()方法返回Iterable<Position<E>>来达到遍历
+	 * Position<E>中的元素的目的
+	 * @author jelex.xu
+	 * @date 2017年10月8日
+	 */
+	private class ElementIterator implements Iterator<E> {
+
+		Iterator<Position<E>> iterator = positions().iterator();
+
+		@Override
+		public boolean hasNext() {
+			return iterator.hasNext();
+		}
+		@Override
+		public E next() {
+			return iterator.next().getElement();
+		}
+		@Override
+		public void remove() {
+			iterator.remove();
+		}
 	}
 
 }
