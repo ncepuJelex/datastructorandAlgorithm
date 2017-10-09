@@ -91,4 +91,73 @@ public class TravesalExample {
 		}
 		return sb.toString();
 	}
+
+	/*
+	 * 计算文件树的大小，之前研究过的那个，
+	 * 这个也算是一个后序遍历问题，但是这里的postorder不适用，
+	 * 因为需要children返回值给parent,而postorder方法中children没有
+	 * 返回值给parent
+	 */
+	public static int diskSpace(Tree<Integer> t, Position<Integer> p) {
+		int subTotal = p.getElement();
+		for(Position<Integer> child : t.children(p)) {
+			subTotal += diskSpace(t, child);
+		}
+		return subTotal;
+	}
+
+	/*
+	 * P(T)= p.getElement()+"("+P(T1)+", "+ ··· +", "+P(Tk)+")"
+	 * 具体一个例子是（无换行）：
+	 * Electronics R’Us (R&D, Sales (Domestic, International (Canada, S. America,
+	 * Overseas (Africa, Europe, Asia, Australia))),
+	 * Purchasing, Manufacturing (TV, CD, Tuner))
+	 */
+	public static <E> void parenthesize(Tree<E> t, Position<E> p) {
+
+		System.out.print(p.getElement());
+		if(t.isInternal(p)) {
+			boolean firstTime = true;
+			for(Position<E> child : t.children(p)) {
+				System.out.print(firstTime ? "(" : ", ");
+				firstTime = true;
+				parenthesize(t, child);
+			}
+			System.out.print(")");
+		}
+	}
+
+	/*
+	 * To maintain an accurate value for the x-coordinate as the traversal
+	 * proceeds, the method must be provided with the value of x that should
+	 * be assigned to the leftmost node of the current subtree,
+	 * and it must return to its parent a revised value of x that is appropriate
+	 * for the first node drawn to the right of the subtree.
+	 * 参照chapter08.jpg图片理解，二叉树才有哦！
+	 */
+	public static <E extends Geometric> int layout(BinaryTree<E> t, Position<E> p, int d, int x) {
+		if(t.left(p) != null) {
+			x = layout(t, t.left(p), d+1, x); //深度要加1，已访问过的数量不变
+		}
+		/*
+		 * setX()之后再递增x,表示下一个访问p的x值会加1,
+		 * 想想，也是，因为是inorder遍历的，先左孩子，再父亲，再右孩子，所以
+		 * x的值是先经过左孩子计算出来的，然后才是当前节点，然后是右孩子，
+		 * 对右孩子(具体是在以右孩子为根节点的子树中，最左边的那个节点)而言，
+		 * x值应该比它的父亲的x属性值大1
+		 */
+		p.getElement().setX(x++);
+		p.getElement().setY(d); //深度在自己这层是不会变的，只是在孩子节点上会变（加1）
+		if(t.right(p) != null) {
+			x = layout(t, t.right(p), d+1, x);
+		}
+		return x;
+	}
+
+	// fake interface for geometric layout problem
+	public interface Geometric {
+
+		public void setX(int x);
+		public void setY(int y);
+	}
 }
