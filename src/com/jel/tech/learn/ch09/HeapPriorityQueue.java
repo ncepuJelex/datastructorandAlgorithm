@@ -16,7 +16,7 @@ public class HeapPriorityQueue<K, V> extends AbstractPriorityQueue<K, V> {
 	 * We prefer to use the more efficient array-based representation of a tree,
 	 * maintaining a Java ArrayList of entry composites.
 	 */
-	private ArrayList<Entry<K, V>> heap = new ArrayList<>();
+	protected ArrayList<Entry<K, V>> heap = new ArrayList<>();
 
 	public HeapPriorityQueue() {
 		super();
@@ -155,6 +155,34 @@ public class HeapPriorityQueue<K, V> extends AbstractPriorityQueue<K, V> {
 		 */
 		downheap(0);
 		return temp;
+	}
+
+	/*
+	 *  two coordinate arrays that are presumed to have the same length,
+	 *  相比前一种处理方式（run in O(nlogn) time in the worst case），
+	 *  here is an alternative bottom-up construction
+	 *  method that runs in O(n) time.
+	 */
+	public HeapPriorityQueue(K[] keys, V[] values) {
+		super();
+		for(int i=0, size=Math.min(keys.length, values.length); i<size; i++) {
+			heap.add(new PQEntry<K, V>(keys[i], values[i]));
+		}
+		heaplify();
+	}
+	/*
+	 * 假设有n个元素，第一次先排列n/2个元素，你认为有n/2个heap也没错！
+	 * 就是把n/2个元素摆放在最下面那一层；
+	 * 第二次排列，在倒数第2层放入相应的元素并排序好，以便形成 n/4 个heap，
+	 * 最后形成了根节点的左右子heap，加入root形成完整有序的一个heap.
+	 */
+	protected void heaplify() {
+		//从最后一个元素的父节点开始搞事，往前遍历（它们都有孩子节点啊），
+		//往下走，以便形成有序的heap
+		int startIndex = parent(heap.size()-1);
+		for(int j=startIndex; j>=0; j--) {
+			downheap(j);
+		}
 	}
 
 }
