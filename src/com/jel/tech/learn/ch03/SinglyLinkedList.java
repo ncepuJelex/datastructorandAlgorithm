@@ -142,6 +142,32 @@ public class SinglyLinkedList<E> implements Cloneable {
 		}
 		return true;
 	}
+	/*
+	 * 重写hashCode()方法，直到学习第10章hashCode那节才回到这来
+	 * 实现该方法，勿见怪！
+	 * A variant of the polynomial hash code replaces multiplication by
+	 * a with a cyclic shift of a partial sum by a certain number of bits.
+	 * For example, a 5-bit cyclic shift of the 32-bit value
+		101100101101010100010101000 is achieved by taking the
+		leftmost five bits and placing those on the rightmost side of the representation,
+		resulting in 10110010110101010001010100000111.
+		While this operation has little natural meaning in terms of arithmetic,
+		it accomplishes the goal of varying the bits of the calculation.
+		In Java, a cyclic shift of bits can be accomplished through careful
+		use of the bitwise shift operators.we must wisely choose the amount
+		to shift by for each new character. Our choice of a 5-bit shift is
+		justified by experiments run on a list of just over 230,000 English words,
+		comparing the number of collisions for various shift amounts
+	 */
+	@Override
+	public int hashCode() {
+		int h = 0;
+		for(Node<E> walk=head; walk!=null; walk=walk.getNext()) {
+			h ^= walk.getElement().hashCode();
+			h = (h<<5) | (h>>>27);
+		}
+		return h;
+	}
 
 	public SinglyLinkedList<E> clone() throws CloneNotSupportedException {
 		//把size和head clone一下,size这样搞没问题，但是head就不行了，除非head==null
@@ -162,7 +188,6 @@ public class SinglyLinkedList<E> implements Cloneable {
 		}
 		return other;
 	}
-
 	/**
 	 * Produces a string representation of the contents of the list. This exists
 	 * for debugging purposes only.
