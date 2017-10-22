@@ -116,6 +116,10 @@ public class UnsortedTableMap<K, V> extends AbstractMap<K, V> {
 			Entry<Integer, String> next = iterator.next();
 			System.out.println(next.getKey() + "=>" + next.getValue());
 		}
+		String string = m.get(7);
+		System.out.println(string);
+		String remove = m.remove(101);
+		System.out.println(remove);
 		/*
 		 *running result:
 		 	101=>张三
@@ -123,6 +127,8 @@ public class UnsortedTableMap<K, V> extends AbstractMap<K, V> {
 			103=>王五
 			7=>Cristiano Ronaldo
 			10=>Messi
+			Cristiano Ronaldo
+			张三
 		 */
 	}
 }
