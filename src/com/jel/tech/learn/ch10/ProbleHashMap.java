@@ -58,7 +58,7 @@ public class ProbleHashMap<K, V> extends AbstractHashMap<K, V> {
 		do {
 			//如果可用（同时也意味着没找到，其它地方也不用找了，没有）
 			if(isAvailable(j)) {
-				//第一次循环就进来了！
+				//第一次循环进来！
 				if(available == -1) {
 					available = j;
 				}
