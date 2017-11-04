@@ -193,6 +193,8 @@ public class TreeMap<K, V> extends AbstractSortedMap<K,V> {
 	 protected boolean isInternal(Position<Entry<K,V>> p) { return tree.isInternal(p); }
 	 protected void set(Position<Entry<K,V>> p, Entry<K,V> e) { tree.set(p, e); }
 	 protected Entry<K,V> remove(Position<Entry<K,V>> p) { return tree.remove(p); }
+	 protected void rotate(Position<Entry<K,V>> p) { tree.rotate(p); }
+	 protected Position<Entry<K,V>> restructure(Position<Entry<K,V>> x) { return tree.restructure(x); }
 
 	@Override
 	public Entry<K, V> firstEntry() {
