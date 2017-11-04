@@ -25,7 +25,7 @@ public class TreeMap<K, V> extends AbstractSortedMap<K,V> {
 	protected static class BalanceableBinaryTree<K,V> extends LinkedBinaryTree<Entry<K,V>> {
 		/*
 		 * Many tree-balancing strategies require that some form of auxiliary
-		 * “balancing” in- formation be stored at nodes of a tree,所以才会另写一个
+		 * "balancing" in- formation be stored at nodes of a tree,所以才会另写一个
 		 * Node子类，并增加一个辅助字段
 		 */
 		protected static class BSTNode<E> extends Node<E> {
