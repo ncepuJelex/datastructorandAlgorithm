@@ -58,7 +58,7 @@ public class LinkedBinaryTree<E> extends AbstractBinaryTree<E> {
 	protected Node<E> createNode(E e, Node<E> parent, Node<E> left, Node<E> right) {
 		return new Node<E>(e, parent, left, right);
 	}
-
+	//protected修饰，因为后面会有子类继承
 	protected Node<E> root = null; //根节点
 	private int size = 0; //元素个数
 

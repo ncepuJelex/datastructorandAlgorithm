@@ -1,4 +1,4 @@
-package com.jel.tech.learn.ch10;
+package com.jel.tech.learn.ch11;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -6,6 +6,8 @@ import java.util.Comparator;
 import com.jel.tech.learn.ch07.Position;
 import com.jel.tech.learn.ch08.LinkedBinaryTree;
 import com.jel.tech.learn.ch09.Entry;
+import com.jel.tech.learn.ch10.AbstractMap;
+import com.jel.tech.learn.ch10.AbstractSortedMap;
 
 /**
  * 使用二叉树实现的排序map,从这里开始会慢慢引出平衡树
@@ -21,8 +23,152 @@ public class TreeMap<K, V> extends AbstractSortedMap<K,V> {
 	 * 只是它所继承的LinkedBinaryTree<Entry<K,V>>中的功能
 	 */
 	protected static class BalanceableBinaryTree<K,V> extends LinkedBinaryTree<Entry<K,V>> {
+		/*
+		 * Many tree-balancing strategies require that some form of auxiliary
+		 * “balancing” in- formation be stored at nodes of a tree,所以才会另写一个
+		 * Node子类，并增加一个辅助字段
+		 */
+		protected static class BSTNode<E> extends Node<E> {
+			//辅助字段
+			int aux = 0;
+			public BSTNode(E element, Node<E> parent,Node<E> left,Node<E> right) {
+				super(element, parent, left, right);
+			}
+			public int getAux() {
+				return aux;
+			}
+			public void setAux(int aux) {
+				this.aux = aux;
+			}
+		}
+		//BSTNode 定义结束================
+		public int getAux(Position<Entry<K,V>> p) {
+			return ((BSTNode<Entry<K,V>>)p).getAux();
+		}
+		public void setAux(Position<Entry<K,V>> p, int aux) {
+			((BSTNode<Entry<K,V>>)p).setAux(aux);
+		}
+		/*
+		 * 覆盖父类的方法，因为这里要创建BSTNode而不是普通的Node了
+		 */
+		@Override
+		protected Node<Entry<K, V>> createNode(Entry<K, V> e, Node<Entry<K, V>> parent, Node<Entry<K, V>> left,
+				Node<Entry<K, V>> right) {
+			return new BSTNode<Entry<K,V>>(e, parent, left, right);
+		}
+		/*
+		 * rotate使用的工具方法，重写链接父和子节点关系
+		 */
+		private void relink(Node<Entry<K,V>> parent, Node<Entry<K,V>> child, boolean makeLeftChild) {
+			child.setParent(parent);
+			if(makeLeftChild) {
+				parent.setLeft(child);
+			} else {
+				parent.setRight(child);
+			}
+		}
+		/**
+	     * Rotates Position p above its parent(一句话抓住要点！).  Switches between these
+	     * configurations, depending on whether p is a or p is b.
+	     *<pre>
+	     *          b                  a
+	     *         / \                / \
+	     *        a  t2             t0   b
+	     *       / \                    / \
+	     *      t0  t1                 t1  t2
+	     *</pre>
+	     *  Caller should ensure that p is not the root.
+	     *  One or more rotations can be combined to provide broader rebalancing within a tree.
+	     *  One such compound operation we consider is a trinode restructuring.
+	     *  For this manipulation, we consider a position x, its parent y,
+	     *  and its grandparent z.
+	     *  <p>
+	     *  The goal is to restructure the subtree rooted at z in order to reduce the
+	     *  overall path length to x and its subtrees
+	     *  </p>
+	     */
+		public void rotate(Position<Entry<K,V>> p) {
+			//待旋转节点
+			Node<Entry<K,V>> x = this.validate(p);
+			//x的父节点
+			Node<Entry<K,V>> y = x.getParent();
+			//x的祖父节点
+			Node<Entry<K,V>> z = y.getParent();
+			//如果x祖父节点为空，说明x的你节点是根节点，此时x旋转后变成根节点了
+			if(z == null) {
+				this.root = x;
+				x.setParent(null); //这才是真正完成了到根节点的转化
+			} else {
+				relink(z, x, y==z.getLeft()); //把x和它的祖父节点z,关联起来
+			}
+			/*
+			 * 分2种情况
+			 */
+			if(x == y.getLeft()) {
+				//语句顺序不能反哦
+				relink(y, x.getRight(), true);
+				relink(x, y, false);
+			} else {
+				//语句顺序不能反哦
+				relink(y, x.getLeft(), false);
+				relink(x, y, true);
+			}
+		}
+		/**
+		 * Returns the Position that becomes the root of the restructured subtree.
+	     * Assumes the nodes are in one of the following configurations:
+	     * <p>
+	     * 上面排列的规律:看xyz,而不是abc,z是祖父节点，这样理解就知道有4种排列组合形状了，
+	     *  其中：z是祖父节点，位置固定，作为z的孩子节点有左右2种变化，同样，作为y的孩子节点
+	     *  也有左右之分2种变化，所以形成了下面4种形状的图形。
+		 *	xyz位置确定了,按照先序遍历角度看，a在前,b在中,c在后,分别对应上xyz就简单了,
+		 *	旋转之后，b(从先序遍历的角度看,中间的节点)成为新的局部“根”节点
+		 *</p>
+	     *<pre>
+	     *     z=a                 z=c           z=a               z=c
+	     *    /  \                /  \          /  \              /  \
+	     *   t0  y=b             y=b  t3       t0   y=c          y=a  t3
+	     *      /  \            /  \               /  \         /  \
+	     *     t1  x=c         x=a  t2            x=b  t3      t0   x=b
+	     *        /  \        /  \               /  \              /  \
+	     *       t2  t3      t0  t1             t1  t2            t1  t2
+	     *</pre>
+	     * The subtree will be restructured so that the node with key b becomes its root.
+	     *<pre>
+	     *           b
+	     *         /   \
+	     *       a       c
+	     *      / \     / \
+	     *     t0  t1  t2  t3
+	     *</pre>
+	     * Caller should ensure that x has a grandparent.
+		 *  <p>
+	     *  请参看图片rotate-1.jpg 和rotate-2.jpg 理解
+	     *  </p>
+		 * @param x
+		 * @return 新子树的根节点位置
+		 */
+		public Position<Entry<K,V>> restructure(Position<Entry<K,V>> x) {
+			//x的父节点
+			Position<Entry<K,V>> y = parent(x);
+			//x的祖父节点（确保了一定存在）
+			Position<Entry<K,V>> z = parent(y);
+			//前2种图形
+			//这行代码写得6啊！
+			if((x==right(y)) == (y==right(z))) {
+				//只需要旋转一次
+				rotate(y);
+				return y;
+			} else {
+				//旋转2次
+				rotate(x);
+				rotate(x);
+				return x;
+			}
+		}
 
 	}
+	//=========BalanceableBinaryTree<K,V> 定义结束=============//
 	//底层的数据结构为平衡二叉树
 	protected BalanceableBinaryTree<K, V> tree = new BalanceableBinaryTree<>();
 
@@ -207,6 +353,12 @@ public class TreeMap<K, V> extends AbstractSortedMap<K,V> {
 		//从根节点遍历查找key的position
 		Position<Entry<K,V>> p = this.treeSearch(root(), key);
 		//不解的是：查找遍历怎么破坏平衡树的结构了？ @ TODO
+		/*
+		 * 其实并没有破坏树的结构，
+		 * This hook is specifically used by the splay tree structure
+		 * (see Section 11.4) to restructure a tree so that more frequently
+		 * accessed nodes are brought closer to the root
+		 */
 		rebalanceAccess(p);
 		//查找返回的是叶子节点，表示没找到，返回空
 		if(isExternal(p)) {
@@ -279,6 +431,11 @@ public class TreeMap<K, V> extends AbstractSortedMap<K,V> {
 			this.remove(leaf);
 			this.remove(p);
 			//hook,为什么是对sibling处理呢？ @ TODO
+			/*
+			 * the argument passed in ,Position p, which could be internal or external,
+			 * represents the deepest node of the tree that was accessed
+			 * during the operation.
+			 */
 			this.rebalanceDelete(sibling);
 			return old;
 		}
