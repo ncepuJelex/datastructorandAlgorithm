@@ -11,34 +11,34 @@ import java.util.Scanner;
  */
 public class DiskSpace {
 
-	public static long diskUsage(File root) {
-		// 该文件目录自身所占用的大小(bytes)
-		long total = root.length();
-		// 遍历该目录底下的entries
-		if (root.isDirectory()) {
-			for (String childName : root.list()) {
-				File child = new File(root, childName);
-				total += diskUsage(child);
-			}
-		}
-		System.out.println(total + "\t" + root);
-		return total;
-	}
+    public static long diskUsage(File root) {
+        // 该文件目录自身所占用的大小(bytes)
+        long total = root.length();
+        // 遍历该目录底下的entries
+        if (root.isDirectory()) {
+            for (String childName : root.list()) {
+                File child = new File(root, childName);
+                total += diskUsage(child);
+            }
+        }
+        System.out.println(total + "\t" + root);
+        return total;
+    }
 
-	/**
-	 * Computes disk usage of the path given as a command line argument. Sample
-	 * usage: java DiskSpace /Users/zhenhua/Downloads/JavaConcurrrencyPractice
-	 */
-	public static void main(String[] args) {
-		String start;
-		if (args.length > 0) {
-			start = args[0];
-		} else {
-			System.out.print("Enter the starting location: ");
-			start = new Scanner(System.in).next();
-		}
-		diskUsage(new File(start));
-	}
+    /**
+     * Computes disk usage of the path given as a command line argument. Sample
+     * usage: java DiskSpace /Users/zhenhua/Downloads/JavaConcurrrencyPractice
+     */
+    public static void main(String[] args) {
+        String start;
+        if (args.length > 0) {
+            start = args[0];
+        } else {
+            System.out.print("Enter the starting location: ");
+            start = new Scanner(System.in).next();
+        }
+        diskUsage(new File(start));
+    }
 	/*
 	 * running result:
 	 * Enter the starting location: /Users/zhenhua/Downloads/JavaConcurrrencyPractice
